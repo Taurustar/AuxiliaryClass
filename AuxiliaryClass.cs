@@ -12,7 +12,7 @@ public static class AuxiliaryClass
     private static System.Random rng = new System.Random();
 
     /// <summary>
-    /// Fisher-Yates shuffling algorythm
+    /// Fisher-Yates shuffling algorithm
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="list">The list of T type that's going to be suffled</param>
@@ -162,7 +162,7 @@ public static class AuxiliaryClass
                 }
                 catch
                 {
-                } // In case of NotImplementedException being thrown. For some reason specifying that exception didn't seem to catch it, so I didn't catch anything specific.
+                } // In case of NotImplementedException being thrown. For some reason, specifying that exception didn't catch anything specific.
             }
         }
 
@@ -176,7 +176,60 @@ public static class AuxiliaryClass
     }
 
     /// <summary>
-    /// Add Component extensions that allows to copy values from existing Gameobject's component
+    /// Recovers data from a CSV file and uses it as serialized data to generate an Instance of a class.
+    /// Constrains:
+    ///     The first row acts as headers and is ignored.
+    ///     The CSV must have 2 columns.
+    ///     The first column must be the class variable names.
+    ///     The second column must be the values of those variables.
+    /// </summary>
+    /// <param name="csv">The csv string</param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns>Returns the new instance of a T class based on CSV data</returns>
+    public static T SerializedFromCsv<T>(this string csv)
+    {
+        string[] rows = csv.Split('\n');
+
+        string json = "{\n";
+
+        for (int i = 1; i < rows.Length; i++)
+        {
+            string evalColumn = "";
+            string[] columns = rows[i].Split(',');
+            if (columns.Length > 2)
+                evalColumn = rows[i].Split(',')[Range.StartAt(1)].CreateCsvStringArray();
+            else
+                evalColumn = columns[1];
+            
+            
+            json += "\"" + rows[i].Split(",")[0] + "\" : " + evalColumn + ",\n";
+        }
+        
+        json = json.Substring(0,json.Length - 2);
+        json += "\n} ";
+        
+        return JsonUtility.FromJson<T>(json);
+
+    }
+
+    /// <summary>
+    /// From a CSV string recombines the elements of an Array value to use in a JSON
+    /// </summary>
+    /// <param name="array"></param>
+    /// <returns></returns>
+    public static string CreateCsvStringArray(this string[] array)
+    {
+        string csvString = "";
+        for (int i = 0; i < array.Length; i++)
+        {
+            csvString += array[i] + ",";
+        }
+        
+        return csvString.Substring(0, csvString.Length - 1);
+    }
+
+    /// <summary>
+    /// Add Component extension that allows to copy values from existing Gameobject's component
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="go"></param>
